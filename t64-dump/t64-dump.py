@@ -52,6 +52,10 @@ def main():
                         version='%(prog)s {}'.format(VERSION))
     args = parser.parse_args()
 
+    # header
+    print("t64-dump")
+    print("========\n")
+
     # load file in to memory
     try:
         if args.input.endswith('.zip'):
@@ -65,6 +69,9 @@ def main():
                 process_data(data, args)
     except(FileNotFoundError):
         print("File not found error")
+
+    # footer
+    print("(end)")
 
 
 def process_data(data, args):
@@ -105,12 +112,17 @@ def process_data(data, args):
         if (args.list):
             print("{}\t{}\t\t${}\t\t${}".format(
                 file_name, file_type, format(start_addr, '04x'), format(end_addr, '04x')))
-        elif(not args.extract or file_name.strip().lower() in args.extract):
-            content = data[content_start:content_end]
+        elif(args.extract and not file_name.strip().lower() in args.extract):
+            print("Skipping file {}".format(file_name.strip()))
+        else:
+            output_file_name = "{}{}.{}({}-{})".format(("{}" if args.dest.endswith("/") else "{}/").format(args.dest),
+                                                       file_name.strip().lower(), file_type.lower(), format(start_addr, '04x'), format(end_addr, '04x'))
+            print("Extracting file {} to {}".format(
+                file_name.strip(), output_file_name))
 
+            content = data[content_start:content_end]
+            # todo: create dest directory if it doesn't exist
             # todo: write bytes (to dest)
-            # - output should be "archon.prg ($0801-$faef)"
-            print(content)
 
         recordOffset += FILE_RECORD_LENGTH
 

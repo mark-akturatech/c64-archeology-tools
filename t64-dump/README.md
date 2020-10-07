@@ -25,17 +25,49 @@ optional arguments:
 
 List all files in the archive:
 ```bash
-t64-dump archon.zip -l
+python t64-dump archon.zip -l
+
+t64-dump
+========
+
+Tape description:
+C64S tape file
+Demo tape......
+
+User description:
+DEMO TAPE               
+
+Number of directory entries: 1
+
+Filename                File Type       Start Addr      End Addr
+MANUAL                  PRG             $0801           $212c
+ARCHON                  PRG             $0801           $9f0a
+(end)
 ```
 
-Extract all files in the archive to the current directory:
+Extract all files from the archive to the current directory:
 ```bash
-t64-dump archon.zip -x
+python t64-dump archon.zip -x
+
+t64-dump
+========
+
+Extracting file MANUAL to ./manual.prg(0801-212c)
+Extracting file ARCHON to ./archon.prg(0801-9f0a)
+(end)
 ```
 
 Extract only the archon file in the archive to a given directory:
 ```bash
-t64-dump archon.zip -x archon -d ./output/
+python t64-dump archon.zip -x archon -d ./output/
+
+t64-dump
+========
+
+Skipping file MANUAL
+Extracting file ARCHON to ./output/archon.prg(0801-9f0a)
+(end)
+
 ```
 
 ## References
