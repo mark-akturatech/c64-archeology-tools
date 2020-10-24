@@ -37,7 +37,7 @@ Demo tape......
 User description:
 DEMO TAPE               
 
-Number of directory entries: 1
+Number of directory entries: 2
 
 Filename                File Type       Start Addr      End Addr
 MANUAL                  PRG             $0801           $212c

@@ -4,6 +4,8 @@
 # importing required modules
 from zipfile import ZipFile
 import argparse
+import os
+import sys
 
 # global constants
 VERSION = '0.1'
@@ -97,8 +99,9 @@ def process_data(data, args):
         entry_type = data[recordOffset + FILE_RECORD_OFFSET_ENTRY_TYPE]
         file_type_id = data[recordOffset + FILE_RECORD_OFFSET_FILE_TYPE]
         file_type = FILE_TYPES[file_type_id] if file_type_id in FILE_TYPES else "UNK"
-        start_addr = data[recordOffset + FILE_RECORD_OFFSET_START_ADDR +
-                          1] << 8 | data[recordOffset + FILE_RECORD_OFFSET_START_ADDR]
+        start_addr_lo = data[recordOffset + FILE_RECORD_OFFSET_START_ADDR]
+        start_addr_hi = data[recordOffset + FILE_RECORD_OFFSET_START_ADDR + 1]
+        start_addr = start_addr_hi << 8 | start_addr_lo
         end_addr = data[recordOffset + FILE_RECORD_OFFSET_END_ADDR +
                         1] << 8 | data[recordOffset + FILE_RECORD_OFFSET_END_ADDR]
         content_start = data[recordOffset + FILE_RECORD_OFFSET_CONTENT_START +
@@ -115,14 +118,28 @@ def process_data(data, args):
         elif(args.extract and not file_name.strip().lower() in args.extract):
             print("Skipping file {}".format(file_name.strip()))
         else:
-            output_file_name = "{}{}.{}({}-{})".format(("{}" if args.dest.endswith("/") else "{}/").format(args.dest),
-                                                       file_name.strip().lower(), file_type.lower(), format(start_addr, '04x'), format(end_addr, '04x'))
+            dest_dir = ("{}" if args.dest.endswith(
+                "/") else "{}/").format(args.dest)
+            output_file_name = "{}{}({}-{}).{}".format(dest_dir,
+                                                       file_name.strip().lower(), format(start_addr, '04x'), format(end_addr, '04x'), file_type.lower())
             print("Extracting file {} to {}".format(
                 file_name.strip(), output_file_name))
 
-            content = data[content_start:content_end]
-            # todo: create dest directory if it doesn't exist
-            # todo: write bytes (to dest)
+            
+            content = bytes([start_addr_lo, start_addr_hi]) + data[content_start:content_end]
+
+            # save the file
+            try:
+                if not os.path.isdir(dest_dir):
+                    os.makedirs(dest_dir)
+                try:
+                    with open(output_file_name, "wb") as output:
+                        output.write(content)
+                except:
+                    print("** Error saving file:", sys.exc_info()[0])
+            except:
+                print("** Could not create destination directory:",
+                      sys.exc_info()[0])
 
         recordOffset += FILE_RECORD_LENGTH
 
